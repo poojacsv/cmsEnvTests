@@ -1,0 +1,33 @@
+name: Scheduled Playwright Tests
+on:
+  schedule:
+    - cron: '0 23 * * *'     # daily at 23:00 UTC — adjust as needed
+  workflow_dispatch: {}
+
+jobs:
+  run-tests:
+    runs-on: [self-hosted, windows, vpn]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        shell: pwsh
+        run: |
+          npm ci
+          npx playwright install --with-deps
+
+      - name: Run tests (headless)
+        shell: pwsh
+        run: pwsh -NoProfile -ExecutionPolicy Bypass -File "${{ github.workspace }}\\scripts\\run-selected-tests.ps1"
+
+      - name: Upload summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-summary
+          path: headed-test_summary.md

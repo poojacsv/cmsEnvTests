@@ -1,0 +1,6 @@
+Started: 2026-05-18T11:58:23.3628942+10:00
+
+> npx playwright test tests/cms/cmsstg_login.spec.js tests/ecourt/ecourt_login.spec.js tests/edocs/edocs_portal_login.spec.js --project=chrome --project=edge --headed --reporter=json
+
+Completed: 2026-05-18T11:58:56.9682514+10:00
+Summary: C:\Users\vidhuad\CMS-Automation\CMS-env-tests\headed-test-summary-2026-05-07.md

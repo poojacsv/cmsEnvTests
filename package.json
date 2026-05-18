@@ -1,0 +1,25 @@
+{
+  "name": "cms-env-tests",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "nx": "nx",
+    "test": "nx test cms-env-tests",
+    "test:chromium": "nx test cms-env-tests -- --project=chromium",
+    "test:ecourt": "nx e2e cms-env-tests -- tests/ecourt/ecourt_login.spec.js --project=chrome --project=edge",
+    "test:cmsstg": "nx e2e cms-env-tests -- tests/cms/cmsstg_login.spec.js --project=chrome --project=edge",
+    "test:edocs": "nx e2e cms-env-tests -- tests/edocs/edocs_portal_login.spec.js --project=chrome --project=edge"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.58.2",
+    "@types/node": "^25.5.0",
+    "nx": "^22.7.1"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2"
+  }
+}

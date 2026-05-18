@@ -1,0 +1,53 @@
+{
+  "cookies": [
+    {
+      "name": "JSESSIONID",
+      "value": "93569C4CAB0D00D808C43644252414DA",
+      "domain": "cms.courts.vic.gov.au",
+      "path": "/ecourt",
+      "expires": -1,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "hz",
+      "value": "HZ6A9F19FD66E14C82A7FD84BBFF71388D",
+      "domain": "cms.courts.vic.gov.au",
+      "path": "/ecourt",
+      "expires": -1,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "_dd_s",
+      "value": "aid=8b26934c-b9b9-478d-9457-da30ba07cf02&rum=2&id=addd821c-17b7-4561-a4c2-a2221e87680a&created=1776998686835&expire=1776999586836",
+      "domain": "cms.courts.vic.gov.au",
+      "path": "/",
+      "expires": 1808534686,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Strict"
+    }
+  ],
+  "origins": [
+    {
+      "origin": "https://cms.courts.vic.gov.au",
+      "localStorage": [
+        {
+          "name": "lastTime",
+          "value": "1776998686658"
+        },
+        {
+          "name": "leftnav.accordion.opened",
+          "value": "leftnav0"
+        },
+        {
+          "name": "islandStates",
+          "value": ""
+        }
+      ]
+    }
+  ]
+}

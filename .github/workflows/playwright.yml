@@ -9,7 +9,7 @@ on:
 jobs:
   test:
     timeout-minutes: 60
-    runs-on: [self-hosted, linux, vpn]
+    runs-on: [self-hosted, windows, vpn]
 
     env:
       ECOURT_USERNAME: ${{ secrets.ECOURT_USERNAME }}

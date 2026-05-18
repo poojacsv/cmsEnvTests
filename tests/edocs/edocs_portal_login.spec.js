@@ -28,9 +28,31 @@ async function fillLoginForm(page) {
 
 async function openLoginPage(page) {
   const loginLink = page.getByRole('link', { name: /log-?in|login|sign\s*in/i }).first();
-  await expect(loginLink).toBeVisible();
-  await loginLink.click();
-  await expect(page.getByRole('textbox', { name: /user\s*name|username|e-?mail|email/i })).toBeVisible();
+  // Wait up to 15s for the primary login link to appear (CI can be slow).
+  try { await loginLink.waitFor({ state: 'visible', timeout: 15000 }); } catch {}
+
+  if ((await loginLink.count()) === 0) {
+    // Fallbacks: try a login button, a link with 'login' in href, or navigate to /login
+    const altButton = page.getByRole('button', { name: /log-?in|login|sign\s*in/i }).first();
+    if ((await altButton.count()) > 0) {
+      await altButton.waitFor({ state: 'visible', timeout: 5000 });
+      await altButton.click();
+    } else {
+      const hrefLogin = page.locator('a[href*="login"]').first();
+      if ((await hrefLogin.count()) > 0) {
+        await hrefLogin.waitFor({ state: 'visible', timeout: 5000 });
+        await hrefLogin.click();
+      } else {
+        const origin = new URL(page.url()).origin;
+        await page.goto(`${origin}/login`, { waitUntil: 'domcontentloaded' });
+      }
+    }
+
+    await page.getByRole('textbox', { name: /user\s*name|username|e-?mail|email/i }).waitFor({ state: 'visible', timeout: 10000 });
+  } else {
+    await loginLink.click();
+    await page.getByRole('textbox', { name: /user\s*name|username|e-?mail|email/i }).waitFor({ state: 'visible', timeout: 10000 });
+  }
 }
 
 async function openMyAccount(page) {

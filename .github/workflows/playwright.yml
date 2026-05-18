@@ -41,3 +41,34 @@ jobs:
         name: playwright-report
         path: playwright-report/
         retention-days: 30
+
+    - name: Send success email with report
+      if: success()
+      uses: dawidd6/action-send-mail@v3
+      with:
+        server_address: smtp.office365.com
+        server_port: 587
+        secure: true
+        username: ${{ secrets.EMAIL_USERNAME }}
+        password: ${{ secrets.EMAIL_PASSWORD }}
+
+        subject: "✅ Playwright Tests Passed - ${{ github.repository }}"
+        to: pooja.arora@courts.vic.gov.au
+        from: "Pooja Arora <pooja.arora@courts.vic.gov.au>"
+
+        body: |
+          Hi Team,
+
+          ✔ Playwright test execution completed successfully.
+
+          📌 Repository: ${{ github.repository }}
+          📌 Branch: ${{ github.ref_name }}
+          📌 Commit: ${{ github.sha }}
+          📌 Run ID: ${{ github.run_id }}
+
+          📊 Status: SUCCESS
+
+          🔗 View full run:
+          ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+          📎 Test report is available in GitHub Actions artifacts.

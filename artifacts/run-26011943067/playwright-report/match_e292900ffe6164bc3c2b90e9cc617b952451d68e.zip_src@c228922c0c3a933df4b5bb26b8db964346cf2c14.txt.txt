@@ -1,0 +1,16 @@
+  // Step 2: Validate CMS staging authenticated landing page.
+    await expect(page).toHaveURL(/\/ecourt\/.*(dashboard|home|landing)/i);
+    await expect(page.getByRole('link', { name: /log out/i })).toBeVisible();
+
+    // Step 3: Navigate AFTER login (business flow).
+    await page.goto(getUrl('dev', 'cmsPortalStg'), {
+      waitUntil: 'domcontentloaded'
+    });
+
+    // Step 4: Validate CMS Portal staging navigation.
+    await expect(page).toHaveURL(/cmsportalstg2\.testing\.courts\.vic\.gov\.au/i);
+
+  });
+
+});
+

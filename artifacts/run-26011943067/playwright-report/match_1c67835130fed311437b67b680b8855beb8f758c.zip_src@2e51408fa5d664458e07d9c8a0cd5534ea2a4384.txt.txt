@@ -1,0 +1,18 @@
+;
+
+    // Step 2: Validate eCourt authenticated landing page.
+    await expect(page).toHaveURL(/\/ecourt\/.*(dashboard|home|landing)/i);
+    await expect(page.getByRole('link', { name: /log out/i })).toBeVisible();
+
+    // Step 3: Navigate AFTER login (business flow).
+    await page.goto(getUrl('prod', 'cmsPortalProd'), {
+      waitUntil: 'domcontentloaded'
+    });
+
+    // Step 4: Validate CMS Portal navigation.
+    await expect(page).toHaveURL(/cmsportal\.courts\.vic\.gov\.au/i);
+
+  });
+
+});
+

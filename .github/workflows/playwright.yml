@@ -8,6 +8,11 @@ jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
+    env:
+      ECOURT_USERNAME: ${{ secrets.ECOURT_USERNAME }}
+      ECOURT_PASSWORD: ${{ secrets.ECOURT_PASSWORD }}
+      CMS_STG_USERNAME: ${{ secrets.CMS_STG_USERNAME }}
+      CMS_STG_PASSWORD: ${{ secrets.CMS_STG_PASSWORD }}
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-node@v4

@@ -10,6 +10,32 @@ param(
   [string]$SmtpPassword = ""
 )
 
+# Load .env (if present) and set missing environment variables so both the script and child processes can use them.
+$envFilePath = Join-Path $Root '.env'
+if (Test-Path $envFilePath) {
+  Get-Content $envFilePath | ForEach-Object {
+    $line = $_.Trim()
+    if ($line -and -not $line.StartsWith('#')) {
+      $parts = $line -split '=',2
+      if ($parts.Count -eq 2) {
+        $k = $parts[0].Trim()
+        $v = $parts[1]
+        if (-not [string]::IsNullOrEmpty($env:$k)) { return }
+        $env:$k = $v
+      }
+    }
+  }
+}
+
+# Map common environment variables to script parameters when parameters were not provided.
+if ([string]::IsNullOrWhiteSpace($EmailFrom) -and $env:EMAIL_FROM) { $EmailFrom = $env:EMAIL_FROM }
+if ($EmailTo.Count -eq 0 -and $env:EMAIL_TO) { $EmailTo = $env:EMAIL_TO -split ',' | ForEach-Object { $_.Trim() } }
+if ([string]::IsNullOrWhiteSpace($SmtpServer) -and $env:SMTP_SERVER) { $SmtpServer = $env:SMTP_SERVER }
+if ($SmtpPort -eq 25 -and $env:SMTP_PORT) { $SmtpPort = [int]$env:SMTP_PORT }
+if (-not $UseSsl -and $env:SMTP_USE_SSL) { if ($env:SMTP_USE_SSL -match '^(1|true)$') { $UseSsl = $true } }
+if ([string]::IsNullOrWhiteSpace($SmtpUser) -and $env:SMTP_USER) { $SmtpUser = $env:SMTP_USER }
+if ([string]::IsNullOrWhiteSpace($SmtpPassword) -and $env:SMTP_PASSWORD) { $SmtpPassword = $env:SMTP_PASSWORD }
+
 $ErrorActionPreference = "Stop"
 
 $logDir = Join-Path $Root "scheduled-test-logs"

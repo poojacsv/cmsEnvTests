@@ -20,8 +20,8 @@ if (Test-Path $envFilePath) {
       if ($parts.Count -eq 2) {
         $k = $parts[0].Trim()
         $v = $parts[1]
-        if (-not [string]::IsNullOrEmpty($env:$k)) { return }
-        $env:$k = $v
+        if (-not [string]::IsNullOrEmpty(${env:$k})) { return }
+        ${env:$k} = $v
       }
     }
   }

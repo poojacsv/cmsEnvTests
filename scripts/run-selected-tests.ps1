@@ -44,7 +44,7 @@ New-Item -ItemType Directory -Force -Path $logDir | Out-Null
 $timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
 $logPath = Join-Path $logDir "cms-ecourt-edocs-$timestamp.log"
 $jsonPath = Join-Path $logDir "cms-ecourt-edocs-$timestamp.json"
-$summaryPath = Join-Path $Root "headed-test_summary.md"
+$summaryPath = Join-Path $Root "test_summary.md"
 
 Push-Location $Root
 try {

@@ -11,6 +11,10 @@ jobs:
     timeout-minutes: 60
     runs-on: [self-hosted, windows, vpn]
 
+    defaults:
+      run:
+        shell: powershell
+
     env:
       ECOURT_USERNAME: ${{ secrets.ECOURT_USERNAME }}
       ECOURT_PASSWORD: ${{ secrets.ECOURT_PASSWORD }}
@@ -31,24 +35,23 @@ jobs:
     - name: Install Playwright Browsers
       run: npx playwright install
 
-    - name: Run Playwright tests
-      run: npx playwright test
+    - name: Run Playwright tests (headless)
+      run: .\scripts\run-selected-tests.ps1 -Root "${{ github.workspace }}"
 
     - name: Show test summary
       if: ${{ !cancelled() }}
-      shell: pwsh
       run: |
-        if (Test-Path headed-test_summary.md) {
-          Get-Content headed-test_summary.md | Add-Content $env:GITHUB_STEP_SUMMARY
+        if (Test-Path test_summary.md) {
+          Get-Content test_summary.md | Add-Content $env:GITHUB_STEP_SUMMARY
         } else {
-          "headed-test_summary.md was not generated." | Add-Content $env:GITHUB_STEP_SUMMARY
+          "test_summary.md was not generated." | Add-Content $env:GITHUB_STEP_SUMMARY
         }
 
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
       with:
         name: test-summary
-        path: headed-test_summary.md
+        path: test_summary.md
         retention-days: 30
 
     - uses: actions/upload-artifact@v4

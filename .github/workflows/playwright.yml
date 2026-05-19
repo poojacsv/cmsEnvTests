@@ -28,12 +28,28 @@ jobs:
     - name: Install dependencies
       run: npm ci
 
-    # optional if already installed on runner
     - name: Install Playwright Browsers
-      run: npx playwright install chromium
+      run: npx playwright install
 
     - name: Run Playwright tests
-      run: npx playwright test --project=chrome
+      run: npx playwright test
+
+    - name: Show test summary
+      if: ${{ !cancelled() }}
+      shell: pwsh
+      run: |
+        if (Test-Path headed-test_summary.md) {
+          Get-Content headed-test_summary.md | Add-Content $env:GITHUB_STEP_SUMMARY
+        } else {
+          "headed-test_summary.md was not generated." | Add-Content $env:GITHUB_STEP_SUMMARY
+        }
+
+    - uses: actions/upload-artifact@v4
+      if: ${{ !cancelled() }}
+      with:
+        name: test-summary
+        path: headed-test_summary.md
+        retention-days: 30
 
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}

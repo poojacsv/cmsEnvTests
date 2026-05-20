@@ -1,9 +1,0 @@
-const[u,c]=ct.useState(!1);return m.jsx("button",{className:"button",style:{minWidth:100},onClick:async()=>{await navigator.clipboard.writeText(l),c(!0),setTimeout(()=>{c(!1)},3e3)},children:u?"Copied":"Copy prompt"})},Bv=({diff:l})=>m.jsx("div",{"data-testid":"test-screenshot-error-view",className:"test-error-view",children:m.jsx(um,{diff:l,hideDetails:!0},"image-diff")});function Uv(l){return Mv(l||"",{bg:"var(--color-canvas-subtle)",fg:"var(--color-fg-default)"})}const Qv=`
-# Instructions
-
-- Following Playwright test failed.
-- Explain why, be concise, respect Playwright best practices.
-- Provide a snippet of code with the fix, if possible.
-`.trimStart();async function zv({testInfo:l,metadata:u,errorContext:c,errors:f,buildCodeFrame:r,stdout:o,stderr:h}){var S;const v=new Set(f.filter(O=>O.message&&!O.message.includes(`
-`)).map(O=>O.message));for(const O of f)for(const X of v.keys())(S=O.message)!=null&&S.includes(X)&&v.delete(X);const y=f.filter(O=>!(!O.message||!O.message.includes(`
-`)&&!v.has(O.message)));if(!y.length)return;const A=[Qv,"# Test info","",l];o&&A.push("","# Stdout","","```",Jf(o),"```"),h&&A.push("","# Stderr","","```",Jf(h),"```"),A.push("","# Error details");f

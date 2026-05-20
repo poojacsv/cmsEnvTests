@@ -1,7 +1,8 @@
 name: Scheduled Playwright Tests
+
 on:
   schedule:
-    - cron: '0 23 * * *'     # daily at 23:00 UTC — adjust as needed
+    - cron: '0 23 * * *'
   workflow_dispatch: {}
 
 jobs:
@@ -36,6 +37,7 @@ jobs:
     - name: Run Playwright tests (headless)
       run: .\scripts\run-selected-tests.ps1 -Root "${{ github.workspace }}"
 
+    # ✅ KEEP this (GitHub UI summary)
     - name: Show test summary
       if: ${{ !cancelled() }}
       run: |
@@ -44,6 +46,20 @@ jobs:
         } else {
           "test_summary.md was not generated." | Add-Content $env:GITHUB_STEP_SUMMARY
         }
+
+    # ✅ ✅ NEW STEP (THIS IS THE IMPORTANT FIX)
+    - name: Print test summary to logs (for email → Teams)
+      if: ${{ !cancelled() }}
+      run: |
+        Write-Output "PLAYWRIGHT_RESULT_START"
+
+        if (Test-Path test_summary.md) {
+          Get-Content test_summary.md
+        } else {
+          Write-Output "test_summary.md was not generated."
+        }
+
+        Write-Output "PLAYWRIGHT_RESULT_END"
 
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}

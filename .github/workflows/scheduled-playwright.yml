@@ -60,6 +60,9 @@ jobs:
         }
 
         Write-Output "PLAYWRIGHT_RESULT_END"
+    - name: Print workflow run URL
+      run: |
+        Write-Output "RUN_URL=https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}

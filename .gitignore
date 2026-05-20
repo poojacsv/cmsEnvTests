@@ -7,3 +7,10 @@ node_modules/
 /blob-report/
 /playwright/.cache/
 /playwright/.auth/
+.env
+env.*
+*.log
+*.json
+scheduled-test-logs/
+artifacts/
+node_modules/

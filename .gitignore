@@ -14,3 +14,4 @@ env.*
 scheduled-test-logs/
 artifacts/
 node_modules/
+*test-summary*.md

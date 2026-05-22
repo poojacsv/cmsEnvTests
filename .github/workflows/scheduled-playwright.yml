@@ -5,6 +5,12 @@ on:
     - cron: '0 23 * * *'
   workflow_dispatch: {}
 
+# ✅ REQUIRED for GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 jobs:
   test:
     timeout-minutes: 60
@@ -34,10 +40,13 @@ jobs:
     - name: Install Playwright Browsers
       run: npx playwright install
 
+    # ✅ Ensure HTML report is generated
     - name: Run Playwright tests (headless)
-      run: .\scripts\run-selected-tests.ps1 -Root "${{ github.workspace }}"
+      run: |
+        .\scripts\run-selected-tests.ps1 -Root "${{ github.workspace }}"
+        npx playwright test --reporter=html
 
-    # ✅ KEEP this (GitHub UI summary)
+    # ✅ GitHub UI summary
     - name: Show test summary
       if: ${{ !cancelled() }}
       run: |
@@ -47,7 +56,7 @@ jobs:
           "test_summary.md was not generated." | Add-Content $env:GITHUB_STEP_SUMMARY
         }
 
-    # ✅ ✅ NEW STEP (THIS IS THE IMPORTANT FIX)
+    # ✅ Log output for email/Teams
     - name: Print test summary to logs (for email → Teams)
       if: ${{ !cancelled() }}
       run: |
@@ -60,10 +69,12 @@ jobs:
         }
 
         Write-Output "PLAYWRIGHT_RESULT_END"
+
     - name: Print workflow run URL
       run: |
         Write-Output "RUN_URL=https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
+    # ✅ Upload artifacts (still useful internally)
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
       with:
@@ -77,3 +88,23 @@ jobs:
         name: playwright-report
         path: playwright-report/
         retention-days: 30
+
+    # ✅ ✅ NEW: Publish Playwright report publicly
+
+    - name: Setup GitHub Pages
+      uses: actions/configure-pages@v5
+
+    - name: Upload Playwright report to Pages
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: playwright-report
+
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
+
+    # ✅ Add public link in summary
+    - name: Add public report link to summary
+      run: |
+        echo "### 🌐 Public Test Report" >> $env:GITHUB_STEP_SUMMARY
+        echo "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/" >> $env:GITHUB_STEP_SUMMARY

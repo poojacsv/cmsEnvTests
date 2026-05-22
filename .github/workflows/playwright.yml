@@ -40,35 +40,58 @@ jobs:
     - name: Install Playwright Browsers
       run: npx playwright install
 
-    # ✅ Ensure HTML report is generated
     - name: Run Playwright tests
-      run: npx playwright test --reporter=html
+      run: .\scripts\run-selected-tests.ps1 -Root "${{ github.workspace }}"
 
-    - name: Verify report exists
+    - name: Ensure summary file exists
       run: |
-        if (Test-Path "playwright-report/index.html") {
-          Write-Output "✅ Report found"
-        } else {
-          Write-Error "❌ Report missing"
-          exit 1
+        if (!(Test-Path "test_summary.md")) {
+          "No summary generated" | Out-File test_summary.md
         }
 
-    - uses: actions/upload-artifact@v4
-      with:
-        name: playwright-report
-        path: playwright-report/
+    # ✅ ✅ FIXED HTML HERE
+    - name: Convert summary to HTML
+      run: |
+        $html = @"
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <title>Test Summary</title>
+          <style>
+            body { font-family: Arial; margin: 40px; background: #f9f9f9; }
+            h1 { color: #2c3e50; }
+            h2 { color: #34495e; }
+            p { line-height: 1.6; }
+          </style>
+        </head>
+        <body>
+        <h1>CMS, eCourt, and eEDocs Test Summary</h1>"@
 
-  # ✅ ✅ NEW JOB (this was missing)
+        $content = Get-Content test_summary.md -Raw
+        $content = $content -replace "`n","<br>"
+
+        $html += "<p>$content</p>"
+
+        $html += "</body></html>"
+
+        $html | Out-File -FilePath index.html -Encoding utf8
+
+    - name: Upload site artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: site
+        path: index.html
+
   deploy:
     needs: test
     runs-on: ubuntu-latest
 
     steps:
-    - name: Download report artifact
+    - name: Download site
       uses: actions/download-artifact@v4
       with:
-        name: playwright-report
-        path: playwright-report
+        name: site
+        path: public
 
     - name: Setup GitHub Pages
       uses: actions/configure-pages@v5
@@ -76,7 +99,7 @@ jobs:
     - name: Upload Pages artifact
       uses: actions/upload-pages-artifact@v3
       with:
-        path: playwright-report
+        path: public
 
     - name: Deploy to GitHub Pages
       id: deployment

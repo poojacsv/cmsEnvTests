@@ -65,7 +65,8 @@ jobs:
           </style>
         </head>
         <body>
-        <h1>CMS, eCourt, and eEDocs Test Summary</h1>"@
+        <h1>CMS, eCourt, and eEDocs Test Summary</h1>
+        "@
 
         $content = Get-Content test_summary.md -Raw
         $content = $content -replace "`n","<br>"

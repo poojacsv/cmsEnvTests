@@ -103,7 +103,7 @@ jobs:
       id: deployment
       uses: actions/deploy-pages@v4
 
-    # ✅ Add public link in summary
+          # ✅ Add public link in summary
     - name: Add public report link to summary
       run: |
         echo "### 🌐 Public Test Report" >> $env:GITHUB_STEP_SUMMARY

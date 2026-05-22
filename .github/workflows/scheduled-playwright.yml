@@ -40,71 +40,175 @@ jobs:
     - name: Install Playwright Browsers
       run: npx playwright install
 
-    # ✅ Ensure HTML report is generated
-    - name: Run Playwright tests (headless)
-      run: |
-        .\scripts\run-selected-tests.ps1 -Root "${{ github.workspace }}"
-        npx playwright test --reporter=html
+    - name: Run Playwright tests
+      run: .\scripts\run-selected-tests.ps1 -Root "${{ github.workspace }}"
 
-    # ✅ GitHub UI summary
-    - name: Show test summary
-      if: ${{ !cancelled() }}
+    - name: Ensure summary file exists
       run: |
-        if (Test-Path test_summary.md) {
-          Get-Content test_summary.md | Add-Content $env:GITHUB_STEP_SUMMARY
-        } else {
-          "test_summary.md was not generated." | Add-Content $env:GITHUB_STEP_SUMMARY
+        if (!(Test-Path "test_summary.md")) {
+          "No summary generated" | Out-File test_summary.md
         }
 
-    # ✅ Log output for email/Teams
-    - name: Print test summary to logs (for email → Teams)
-      if: ${{ !cancelled() }}
+    # ✅ ✅ FIXED HTML HERE
+    - name: Convert summary to HTML (Full Dashboard)  
       run: |
-        Write-Output "PLAYWRIGHT_RESULT_START"
+        $content = Get-Content test_summary.md -Raw -Encoding utf8
 
-        if (Test-Path test_summary.md) {
-          Get-Content test_summary.md
-        } else {
-          Write-Output "test_summary.md was not generated."
+        # Extract summary numbers
+        $total = ($content | Select-String "Total test runs:\s*(\d+)" | % { $_.Matches[0].Groups[1].Value })
+        $passed = ($content | Select-String "Passed:\s*(\d+)" | % { $_.Matches[0].Groups[1].Value })
+        $failed = ($content | Select-String "Failed:\s*(\d+)" | % { $_.Matches[0].Groups[1].Value })
+
+        # Extract table rows
+        $rows = ""
+        $lines = $content -split "`n"
+        $start = $false
+
+        foreach ($line in $lines) {
+          if ($line -match "^\| Browser") { $start = $true; continue }
+          if ($start -and $line -match "^\|") {
+            if ($line -match "---") { continue }
+
+            $cols = $line -split "\|"
+            if ($cols.Count -ge 6) {
+              $browser = $cols[1].Trim()
+              $spec = $cols[2].Trim()
+              $test = $cols[3].Trim()
+              $result = $cols[4].Trim()
+              $duration = $cols[5].Trim()
+
+              $color = "green"
+              if ($result -ne "passed") { $color = "red" }
+
+              $rows += "<tr>
+                <td>$browser</td>
+                <td>$spec</td>
+                <td>$test</td>
+                <td style='color:$color;font-weight:bold'>$result</td>
+                <td>$duration</td>
+              </tr>"
+            }
+          }
         }
 
-        Write-Output "PLAYWRIGHT_RESULT_END"
+        # Build HTML
+        $html = "<html><head>
+        <meta charset='UTF-8'>
+        <title>Test Dashboard</title>
+        <style>
+          body { font-family: Segoe UI, Arial; margin:0; background:#f4f6f8; }
 
-    - name: Print workflow run URL
-      run: |
-        Write-Output "RUN_URL=https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          .header { background:#2c3e50; color:white; padding:20px; font-size:22px; }
 
-    # ✅ Upload artifacts (still useful internally)
-    - uses: actions/upload-artifact@v4
-      if: ${{ !cancelled() }}
+          .container { padding:30px; }
+
+          .cards { display:flex; gap:20px; margin-bottom:30px; }
+
+          .card {
+            flex:1;
+            padding:20px;
+            background:white;
+            border-radius:10px;
+            box-shadow:0 2px 6px rgba(0,0,0,0.1);
+            text-align:center;
+          }
+
+          .card h2 { margin:0; font-size:28px; }
+          .card p { margin:5px 0 0; color:#555; }
+
+          .passed { color:green; }
+          .failed { color:red; }
+
+          table {
+            width:100%;
+            border-collapse: collapse;
+            background:white;
+        border-radius:10px;
+        overflow:hidden;
+        box-shadow:0 2px 6px rgba(0,0,0,0.1);
+        }
+
+          th {
+            background:#2c3e50;
+            color:white;
+            padding:12px;
+            text-align:left;
+          }
+
+          td {
+            padding:10px;
+            border-bottom:1px solid #eee;
+          }
+
+          tr:hover { background:#f9f9f9; }
+
+        </style>
+        </head><body>"
+
+        $html += "<div class='header'>CMS, eCourt & eEDocs Test Dashboard</div>"
+        $html += "<div class='container'>"
+
+        # ✅ Summary cards
+        $html += "<div class='cards'>
+          <div class='card'>
+            <h2>$total</h2>
+            <p>Total Tests</p>
+          </div>
+          <div class='card passed'>
+            <h2>$passed</h2>
+            <p>Passed</p>
+          </div>
+          <div class='card failed'>
+            <h2>$failed</h2>
+            <p>Failed</p>
+          </div>
+        </div>"
+
+        # ✅ Table
+        $html += "<table>
+          <thead>
+            <tr>
+              <th>Browser</th>
+              <th>Spec</th>
+              <th>Test</th>
+              <th>Result</th>
+              <th>Duration</th>
+            </tr>
+          </thead>
+          <tbody>
+            $rows
+          </tbody>
+        </table>"
+
+        $html += "</div></body></html>"
+
+        $html | Out-File -FilePath index.html -Encoding utf8
+        
+    - name: Upload site artifact
+      uses: actions/upload-artifact@v4
       with:
-        name: test-summary
-        path: test_summary.md
-        retention-days: 30
+        name: site
+        path: index.html
 
-    - uses: actions/upload-artifact@v4
-      if: ${{ !cancelled() }}
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Download site
+      uses: actions/download-artifact@v4
       with:
-        name: playwright-report
-        path: playwright-report/
-        retention-days: 30
-
-    # ✅ ✅ NEW: Publish Playwright report publicly
+        name: site
+        path: public
 
     - name: Setup GitHub Pages
       uses: actions/configure-pages@v5
 
-    - name: Upload Playwright report to Pages
+    - name: Upload Pages artifact
       uses: actions/upload-pages-artifact@v3
       with:
-        path: playwright-report
+        path: public
 
     - name: Deploy to GitHub Pages
       id: deployment
       uses: actions/deploy-pages@v4
-
-          # ✅ Add public link in summary
-    - name: Add public report link to summary
-      run: |
-        echo "### 🌐 Public Test Report" >> $env:GITHUB_STEP_SUMMARY
-        echo "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/" >> $env:GITHUB_STEP_SUMMARY

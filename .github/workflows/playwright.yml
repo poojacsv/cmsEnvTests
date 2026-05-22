@@ -50,29 +50,28 @@ jobs:
         }
 
     # ✅ ✅ FIXED HTML HERE
-    - name: Convert summary to HTML
+    - name: Convert summary to HTML (Dashboard UI)
       run: |
-        $html = @"
-        <html>
-        <head>
-          <meta charset="UTF-8">
-          <title>Test Summary</title>
-          <style>
-            body { font-family: Arial; margin: 40px; background: #f9f9f9; }
-            h1 { color: #2c3e50; }
-            h2 { color: #34495e; }
-            p { line-height: 1.6; }
-          </style>
-        </head>
-        <body>
-        <h1>CMS, eCourt, and eEDocs Test Summary</h1>
-        "@
-
         $content = Get-Content test_summary.md -Raw
         $content = $content -replace "`n","<br>"
 
-        $html += "<p>$content</p>"
+        $html = "<html><head>
+        <meta charset='UTF-8'>
+        <title>Test Summary Dashboard</title>
+        <style>
+          body { font-family: Segoe UI, Arial; margin:0; background:#f4f6f8; }
+          .header { background:#2c3e50; color:white; padding:20px; font-size:22px; }
+          .container { padding:30px; }
+          .card { background:white; padding:20px; border-radius:8px; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
+        </style>
+        </head><body>"
 
+        $html += "<div class='header'>CMS, eCourt & eEDocs Test Dashboard</div>"
+        $html += "<div class='container'>"
+        $html += "<div class='card'>"
+        $html += "<h2>Latest Test Summary</h2>"
+        $html += "<p>$content</p>"
+        $html += "</div></div>"
         $html += "</body></html>"
 
         $html | Out-File -FilePath index.html -Encoding utf8

@@ -53,6 +53,15 @@ jobs:
     - name: Convert summary to HTML (Full Dashboard)  
       run: |
         $content = Get-Content test_summary.md -Raw -Encoding utf8
+        
+        # ✅ Extract run date
+            $dateMatch = ($content | Select-String "Started:\s*(.*)" | % { $_.Matches[0].Groups[1].Value })
+            if ($dateMatch) {
+              $runDate = Get-Date $dateMatch -Format "dd MMM yyyy HH:mm:ss"
+            } else {
+              $runDate = Get-Date -Format "dd MMM yyyy HH:mm:ss"
+            }
+
 
         # Extract summary numbers
         $total = ($content | Select-String "Total test runs:\s*(\d+)" | % { $_.Matches[0].Groups[1].Value })

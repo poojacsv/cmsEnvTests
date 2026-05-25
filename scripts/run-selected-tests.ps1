@@ -53,6 +53,7 @@ try {
   $specs = @(
     "tests/cms/cmsstg_login.spec.js",
     "tests/ecourt/ecourt_login.spec.js",
+    "tests/edocs/edocs_dev_direct_login.spec.js",
     "tests/edocs/edocs_portal_login.spec.js"
   )
 

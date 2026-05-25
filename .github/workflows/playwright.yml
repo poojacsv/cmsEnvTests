@@ -21,10 +21,15 @@ jobs:
         shell: powershell
 
     env:
+      TEST_ENVIRONMENTS: dev,prod
       ECOURT_USERNAME: ${{ secrets.ECOURT_USERNAME }}
       ECOURT_PASSWORD: ${{ secrets.ECOURT_PASSWORD }}
       CMS_STG_USERNAME: ${{ secrets.CMS_STG_USERNAME }}
       CMS_STG_PASSWORD: ${{ secrets.CMS_STG_PASSWORD }}
+      EDOCS_USERNAME: ${{ secrets.EDOCS_USERNAME }}
+      EDOCS_PASSWORD: ${{ secrets.EDOCS_PASSWORD }}
+      EDOCS_DEV_DIRECT_USERNAME: ${{ secrets.EDOCS_DEV_DIRECT_USERNAME }}
+      EDOCS_DEV_DIRECT_PASSWORD: ${{ secrets.EDOCS_DEV_DIRECT_PASSWORD }}
 
     steps:
     - uses: actions/checkout@v4
@@ -40,7 +45,7 @@ jobs:
     - name: Install Playwright Browsers
       run: npx playwright install
 
-    - name: Run Playwright tests
+    - name: Run CMS, eCourt, and eDocs Playwright tests
       run: .\scripts\run-selected-tests.ps1 -Root "${{ github.workspace }}"
 
     - name: Ensure summary file exists

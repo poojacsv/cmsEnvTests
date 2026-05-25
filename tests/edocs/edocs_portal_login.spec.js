@@ -1,8 +1,8 @@
 const { test, expect } = require('@playwright/test');
 const { getUrl } = require('../../config/cmsUrls');
 
-const username = process.env.EDOCS_USERNAME || 'edocs.support@courts.vic.gov.au';
-const password = process.env.EDOCS_PASSWORD || 'P@55w0rd';
+const username = process.env.EDOCS_USERNAME ;
+const password = process.env.EDOCS_PASSWORD ;
 
 const environments = [
   {

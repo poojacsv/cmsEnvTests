@@ -160,6 +160,8 @@ jobs:
         </head><body>"
 
         $html += "<div class='header'>CMS, eCourt & eEDocs Test Dashboard</div>"
+         $html += "<div style='padding:15px 30px; background:#ecf0f1; color:#555;'>Last Run: 
+          $runDate</div>"
         $html += "<div class='container'>"
 
         # ✅ Summary cards

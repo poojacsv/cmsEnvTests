@@ -1,6 +1,7 @@
 param(
   [string]$Root = "C:\Users\vidhuad\CMS-Automation\CMS-env-tests",
   [switch]$Headed,
+  [string[]]$Specs = @(),
   [string[]]$EmailTo = @(),
   [string]$EmailFrom = "",
   [string]$SmtpServer = "",
@@ -50,15 +51,53 @@ Push-Location $Root
 try {
   "Started: $(Get-Date -Format o)" | Tee-Object -FilePath $logPath
 
-  $specs = @(
+  $specMap = @{
+    "cms" = "tests/cms/cmsstg_login.spec.js"
+    "cms-stg" = "tests/cms/cmsstg_login.spec.js"
+    "cmsstg" = "tests/cms/cmsstg_login.spec.js"
+    "ecourt" = "tests/ecourt/ecourt_login.spec.js"
+    "edocs" = "tests/edocs/edocs_portal_login.spec.js"
+    "edocs-portal" = "tests/edocs/edocs_portal_login.spec.js"
+    "portal" = "tests/edocs/edocs_portal_login.spec.js"
+    "dev-env" = "tests/edocs/edocs_dev_direct_login.spec.js"
+    "prod-env" = "tests/edocs/edocs_prod_direct_login.spec.js"
+  }
+
+  $defaultSpecs = @(
     "tests/cms/cmsstg_login.spec.js",
     "tests/ecourt/ecourt_login.spec.js",
     "tests/edocs/edocs_dev_direct_login.spec.js",
-    "tests/edocs/edocs_portal_login.spec.js"
+    "tests/edocs/edocs_portal_login.spec.js",
+    "tests/edocs/edocs_prod_direct_login.spec.js"
   )
 
+  if ($Specs.Count -eq 0) {
+    $selectedSpecs = $defaultSpecs
+  }
+  else {
+    $selectedSpecs = New-Object System.Collections.Generic.List[string]
+    foreach ($spec in $Specs) {
+      $normalizedSpec = ($spec.Trim() -replace "\\", "/").ToLowerInvariant()
+      if ([string]::IsNullOrWhiteSpace($normalizedSpec)) {
+        continue
+      }
+
+      if ($specMap.ContainsKey($normalizedSpec)) {
+        $selectedSpecs.Add($specMap[$normalizedSpec])
+      }
+      elseif ($normalizedSpec.StartsWith("tests/") -and $normalizedSpec.EndsWith(".spec.js")) {
+        $selectedSpecs.Add($normalizedSpec)
+      }
+      else {
+        throw "Unknown spec '$spec'. Use one of: $($specMap.Keys | Sort-Object | Join-String -Separator ', '), or pass a tests/.../*.spec.js path."
+      }
+    }
+
+    $selectedSpecs = $selectedSpecs | Select-Object -Unique
+  }
+
   $headedArg = if ($Headed) { "--headed" } else { "" }
-  $command = "npx playwright test $($specs -join ' ') --project=chrome --project=edge $headedArg --reporter=json"
+  $command = "npx playwright test $($selectedSpecs -join ' ') --project=chrome --project=edge $headedArg --reporter=json"
 
   "`n> $command" | Tee-Object -FilePath $logPath -Append
   cmd /c "$command > `"$jsonPath`"" 2>&1 | Tee-Object -FilePath $logPath -Append

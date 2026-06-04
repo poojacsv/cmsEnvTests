@@ -2,7 +2,7 @@ name: Scheduled Playwright Tests
 
 on:
   schedule:
-    - cron: '0 21 * * 0-4'
+    - cron: '0 19 * * 0-4'
   workflow_dispatch: {}
 
 # ✅ REQUIRED for GitHub Pages
@@ -30,6 +30,8 @@ jobs:
       EDOCS_PASSWORD: ${{ secrets.EDOCS_PASSWORD }}
       EDOCS_DEV_DIRECT_USERNAME: ${{ secrets.EDOCS_DEV_DIRECT_USERNAME }}
       EDOCS_DEV_DIRECT_PASSWORD: ${{ secrets.EDOCS_DEV_DIRECT_PASSWORD }}
+      EDOCS_PROD_DIRECT_USERNAME: ${{ secrets.EDOCS_PROD_DIRECT_USERNAME }}
+      EDOCS_PROD_DIRECT_PASSWORD: ${{ secrets.EDOCS_PROD_DIRECT_PASSWORD }}
 
     steps:
     - uses: actions/checkout@v4

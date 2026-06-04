@@ -15,6 +15,7 @@ const cmsUrls = {
     prod: {
         cmsProd: 'https://cms.courts.vic.gov.au/ecourt/login.jsp',
         cmsPortalProd: 'https://cmsportal.courts.vic.gov.au/',
+        eDocsProd: 'https://edocs.courts.vic.gov.au/ecourt/login.jsp',
         eDocsPortal: 'https://edocsportal.courts.vic.gov.au/'
     }
 };

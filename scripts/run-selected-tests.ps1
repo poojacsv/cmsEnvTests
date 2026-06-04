@@ -113,27 +113,63 @@ try {
   $mode = if ($Headed) { "headed" } else { "headless" }
   $duration = [math]::Round($result.stats.duration / 1000, 1)
 
-  # ✅ Markdown summary
-  $summary = @"
-# CMS, eCourt, and eDocs Test Summary
+  # ✅ Extract table rows from JSON
+  $tableRows = @()
+  foreach ($suite in $result.suites) {
+    $specFile = $suite.file
+    foreach ($innerSuite in $suite.suites) {
+      $suiteTitle = $innerSuite.title
+      foreach ($spec in $innerSuite.specs) {
+        $testTitle = $spec.title
+        foreach ($test in $spec.tests) {
+          $browser = $test.projectName
+          $status = $test.results[0].status
+          $durationMs = $test.results[0].duration
+          $durationS = [math]::Round($durationMs / 1000, 1)
+          
+          $tableRows += "| $browser | ``$specFile`` | $suiteTitle > $testTitle | $status | ${durationS}s |"
+        }
+      }
+    }
+  }
 
-## Run Info
-- Time: $(Get-Date)
+  # ✅ Markdown summary (for workflow and logs)
+  $summary = @"
+# CMS, eCourt, and eEDocs Test Summary
+
+## Latest Run
+
+- Started: $(Get-Date -Format "dd/MM/yyyy HH:mm:ss")
+- Machine path: ``$Root``
+- Browser projects: ``chrome``, ``edge``
 - Mode: $mode
-- Total: $total
+- Command:
+``````powershell
+& "$playwright" $($playwrightArgs -join ' ')
+``````
+
+## Overall Result
+
+- Total test runs: $total
 - Passed: $passed
 - Failed: $failed
 - Skipped: $skipped
 - Duration: ${duration}s
+- JSON result: ``$jsonPath``
+- Console log: ``$logPath``
 
-## Files
-- JSON: $jsonPath
-- Log: $logPath
+## Test Results
+
+| Browser | Spec | Test | Result | Duration |
+| --- | --- | --- | --- | --- |
+$( $tableRows -join "`n" )
 "@
 
+  # Save to both timestamped file and root test_summary.md
   $summary | Set-Content $summaryPath
+  $summary | Set-Content (Join-Path $Root "test_summary.md")
 
-  "Summary written: $summaryPath" | Tee-Object -FilePath $logPath -Append
+  "Summary written: $summaryPath and test_summary.md" | Tee-Object -FilePath $logPath -Append
 
   # ✅ Email (optional)
   if ($EmailTo.Count -gt 0) {

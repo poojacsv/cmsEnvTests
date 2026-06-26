@@ -49,10 +49,10 @@ jobs:
 
     - name: Run CMS, eCourt, and eDocs Playwright tests
       shell: powershell
-      continue-on-error: true
       run: .\scripts\run-selected-tests.ps1 -Root "${{ github.workspace }}"
 
     - name: Ensure summary file exists
+      if: always()
       shell: powershell
       run: |
         if (!(Test-Path "test_summary.md")) {
@@ -61,8 +61,8 @@ jobs:
 
     # ✅ Convert summary to HTML Dashboard
     - name: Convert summary to HTML (Full Dashboard)  
+      if: always()
       shell: powershell
-      continue-on-error: true
       run: |
         $content = Get-Content test_summary.md -Raw -Encoding utf8
         
@@ -214,6 +214,7 @@ jobs:
         $html | Out-File -FilePath index.html -Encoding utf8
         
     - name: Upload site artifact
+      if: always()
       uses: actions/upload-artifact@v4
       with:
         name: site
@@ -221,10 +222,12 @@ jobs:
 
   deploy:
     needs: test
+    if: always()
     runs-on: ubuntu-latest
 
     steps:
     - name: Download site
+      if: always()
       uses: actions/download-artifact@v4
       with:
         name: site

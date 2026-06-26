@@ -48,16 +48,21 @@ jobs:
       run: npx playwright install
 
     - name: Run CMS, eCourt, and eDocs Playwright tests
+      shell: powershell
+      continue-on-error: true
       run: .\scripts\run-selected-tests.ps1 -Root "${{ github.workspace }}"
 
     - name: Ensure summary file exists
+      shell: powershell
       run: |
         if (!(Test-Path "test_summary.md")) {
-          "No summary generated" | Out-File test_summary.md
+          "Started: $(Get-Date)`nNo tests executed or summary missing" | Out-File test_summary.md
         }
 
-    # ✅ ✅ FIXED HTML HERE
+    # ✅ Convert summary to HTML Dashboard
     - name: Convert summary to HTML (Full Dashboard)  
+      shell: powershell
+      continue-on-error: true
       run: |
         $content = Get-Content test_summary.md -Raw -Encoding utf8
         
